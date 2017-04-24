@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Android实现倒计时的两种方式 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="##Android的优雅实现倒计时功能 倒计时功能在Android中很常见，用得最多的就是在注册用户时发送用于向用户发送验证码。以前实现倒计时功能使用最多的几乎都是通过Handler+Runnable或者通过Timer等实现，但是感觉这些方法都比较繁琐，感觉不是很友好。在了解更多之后发现可以通过使用CountDownTimer或RxJava很方便的实现倒计时功能。 ###方式一：通过CountDo">
+<meta name="keywords">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android实现倒计时的两种方式">
+<meta property="og:url" content="http://yoursite.com/2017/04/25/Android实现倒计时的两种方式/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="##Android的优雅实现倒计时功能 倒计时功能在Android中很常见，用得最多的就是在注册用户时发送用于向用户发送验证码。以前实现倒计时功能使用最多的几乎都是通过Handler+Runnable或者通过Timer等实现，但是感觉这些方法都比较繁琐，感觉不是很友好。在了解更多之后发现可以通过使用CountDownTimer或RxJava很方便的实现倒计时功能。 ###方式一：通过CountDo">
+<meta property="og:updated_time" content="2017-04-24T16:48:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android实现倒计时的两种方式">
+<meta name="twitter:description" content="##Android的优雅实现倒计时功能 倒计时功能在Android中很常见，用得最多的就是在注册用户时发送用于向用户发送验证码。以前实现倒计时功能使用最多的几乎都是通过Handler+Runnable或者通过Timer等实现，但是感觉这些方法都比较繁琐，感觉不是很友好。在了解更多之后发现可以通过使用CountDownTimer或RxJava很方便的实现倒计时功能。 ###方式一：通过CountDo">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android实现倒计时的两种方式" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/25/Android实现倒计时的两种方式/" class="article-date">
+  <time datetime="2017-04-24T16:47:25.000Z" itemprop="datePublished">2017-04-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android实现倒计时的两种方式
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>##Android的优雅实现倒计时功能</p>
+<p>倒计时功能在Android中很常见，用得最多的就是在注册用户时发送用于向用户发送验证码。以前实现倒计时功能使用最多的几乎都是通过Handler+Runnable或者通过Timer等实现，但是感觉这些方法都比较繁琐，感觉不是很友好。在了解更多之后发现可以通过使用CountDownTimer或RxJava很方便的实现倒计时功能。</p>
+<p>###方式一：通过CountDownTimer实现</p>
+<p><a href="https://developer.android.com/reference/android/os/CountDownTimer.html" target="_blank" rel="external">CountDownTimer</a>是Android SDK中提供的一个类。Android SDK的介绍为：</p>
+<p>Schedule a countdown until a time in the future, with regular notifications on intervals along the way. Example of showing a 30 second countdown in a text field:</p>
+<pre><code>new CountDownTimer(30000, 1000) {
+       public void onTick(long millisUntilFinished) {
+           mTextField.setText(&quot;seconds remaining: &quot; + millisUntilFinished / 1000);
+      }
+       public void onFinish() {
+       mTextField.setText(&quot;done!&quot;);
+     }
+ }.start();
+</code></pre><p>The calls to onTick(long) are synchronized to this object so that one call to onTick(long) won’t ever occur before the previous callback is complete. This is only relevant when the implementation of onTick(long) takes an amount of time to execute that is significant compared to the countdown interval.</p>
+<p>大概意思就是定义一个计时器，定期通知。每次同步调用onTick()方法。并提供了一个30s倒计时的例子。<br>通过这个就可以很方便的实现我们需要的倒计时功能。</p>
+<pre><code>tvStart.setEnabled(false);
+   new CountDownTimer(60000, 1000){
+    @Override
+    public void onTick(long millisUntilFinished) {
+        tvStart.setText(&quot;重新发送&quot; + millisUntilFinished / 1000 + &quot;s&quot;);
+    }
+
+    @Override
+    public void onFinish() {
+        tvStart.setText(&quot;发送验证码&quot;);
+        tvStart.setEnabled(true);
+    }
+}.start();
+</code></pre><p>###方式二：通过RxJava实现</p>
+<p>通过RxJava也可以很方便的实现倒计时功能。通过RxJava的interval操作符可以很方便的实现间隔发送数据，然后通过map操作符将发送的0、1、2、…、60这些数据转换成60、59、58、…、0。变成我们需要的顺序。</p>
+<pre><code>Observable.interval(0, 1, TimeUnit.SECONDS)//设置延迟为0，每隔1秒发送一条数据
+        .subscribeOn(AndroidSchedulers.mainThread())
+        .observeOn(AndroidSchedulers.mainThread())
+        .map(new Func1&lt;Long, Integer&gt;() {
+            @Override
+            public Integer call(Long increaseTime) {
+                return 60 - increaseTime.intValue();
+            }
+        })
+        .take(61)//设置循环次数为61次
+        .doOnSubscribe(new Action0() {
+            @Override
+            public void call() {
+                //开始倒计时
+                tvStart.setEnabled(false);
+            }
+        })
+        .subscribe(new Subscriber&lt;Integer&gt;() {
+            @Override
+            public void onCompleted() {
+                //倒计时完成
+                tvStart.setEnabled(true);
+                tvStart.setText(&quot;重新发送&quot;);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onNext(Integer integer) {
+                //剩余时间
+                tvStart.setText(&quot;重新发送&quot; + integer + &quot;s&quot;);
+            }
+        });
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/04/25/Android实现倒计时的两种方式/" data-id="cj1wd7sjm0000tl4c644lv7cz" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/04/25/Android常用框架实现-FragmentTabHost/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Android常用框架实现--FragmentTabHost</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/04/25/Android常用框架实现-FragmentTabHost/">Android常用框架实现--FragmentTabHost</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/25/Android实现倒计时的两种方式/">Android实现倒计时的两种方式</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
