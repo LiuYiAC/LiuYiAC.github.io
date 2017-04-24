@@ -5,12 +5,17 @@
   
   <title>Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
+  <meta name="description" content="##Android 常用框架的实现 现在市面上大部分软件都是通过底部来区分不同的版块，然后分别对应不同的Fragment来处理不同的模块。最常用的方式是通过FragmentTabHost或者通过RadioGroup+FrameLayout来实现。 ###FragmentTabHost实现 ####一、在布局文件中声明FragmentTabHost    &amp;lt;?xml version=”1.0”">
+<meta name="keywords">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta property="og:url" content="http://yoursite.com/2017/04/24/常用APP框架的两种实现方式/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="##Android 常用框架的实现 现在市面上大部分软件都是通过底部来区分不同的版块，然后分别对应不同的Fragment来处理不同的模块。最常用的方式是通过FragmentTabHost或者通过RadioGroup+FrameLayout来实现。 ###FragmentTabHost实现 ####一、在布局文件中声明FragmentTabHost    &amp;lt;?xml version=”1.0”">
+<meta property="og:updated_time" content="2017-04-24T16:36:16.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hexo">
+<meta name="twitter:description" content="##Android 常用框架的实现 现在市面上大部分软件都是通过底部来区分不同的版块，然后分别对应不同的Fragment来处理不同的模块。最常用的方式是通过FragmentTabHost或者通过RadioGroup+FrameLayout来实现。 ###FragmentTabHost实现 ####一、在布局文件中声明FragmentTabHost    &amp;lt;?xml version=”1.0”">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -59,9 +64,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-常用APP框架的两种实现方式" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-常用APP框架的两种实现方式" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/04/24/常用APP框架的两种实现方式/" class="article-date">
   <time datetime="2017-04-24T14:29:19.000Z" itemprop="datePublished">2017-04-24</time>
@@ -167,184 +170,23 @@ private View initIndicatorView(String name, int layoutId, int imageId) {
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-Android优雅实现倒计时功能的两种方式" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/04/22/Android优雅实现倒计时功能的两种方式/" class="article-date">
-  <time datetime="2017-04-21T17:34:51.000Z" itemprop="datePublished">2017-04-22</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>##Android的优雅实现倒计时功能</p>
-<p>倒计时功能在Android中很常见，用得最多的就是在注册用户时发送用于向用户发送验证码。以前实现倒计时功能使用最多的几乎都是通过Handler+Runnable或者通过Timer等实现，但是感觉这些方法都比较繁琐，感觉不是很友好。在了解更多之后发现可以通过使用CountDownTimer或RxJava很方便的实现倒计时功能。</p>
-<p>###方式一：通过CountDownTimer实现</p>
-<p><a href="https://developer.android.com/reference/android/os/CountDownTimer.html" target="_blank" rel="external">CountDownTimer</a>是Android SDK中提供的一个类。Android SDK的介绍为：</p>
-<p>Schedule a countdown until a time in the future, with regular notifications on intervals along the way. Example of showing a 30 second countdown in a text field:</p>
-<pre><code>new CountDownTimer(30000, 1000) {
-       public void onTick(long millisUntilFinished) {
-           mTextField.setText(&quot;seconds remaining: &quot; + millisUntilFinished / 1000);
-      }
-       public void onFinish() {
-       mTextField.setText(&quot;done!&quot;);
-     }
- }.start();
-</code></pre><p>The calls to onTick(long) are synchronized to this object so that one call to onTick(long) won’t ever occur before the previous callback is complete. This is only relevant when the implementation of onTick(long) takes an amount of time to execute that is significant compared to the countdown interval.</p>
-<p>大概意思就是定义一个计时器，定期通知。每次同步调用onTick()方法。并提供了一个30s倒计时的例子。<br>通过这个就可以很方便的实现我们需要的倒计时功能。</p>
-<pre><code>tvStart.setEnabled(false);
-   new CountDownTimer(60000, 1000){
-    @Override
-    public void onTick(long millisUntilFinished) {
-        tvStart.setText(&quot;重新发送&quot; + millisUntilFinished / 1000 + &quot;s&quot;);
-    }
-
-    @Override
-    public void onFinish() {
-        tvStart.setText(&quot;发送验证码&quot;);
-        tvStart.setEnabled(true);
-    }
-}.start();
-</code></pre><p>###方式二：通过RxJava实现</p>
-<p>通过RxJava也可以很方便的实现倒计时功能。通过RxJava的interval操作符可以很方便的实现间隔发送数据，然后通过map操作符将发送的0、1、2、…、60这些数据转换成60、59、58、…、0。变成我们需要的顺序。</p>
-<pre><code>Observable.interval(0, 1, TimeUnit.SECONDS)//设置延迟为0，每隔1秒发送一条数据
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .observeOn(AndroidSchedulers.mainThread())
-        .map(new Func1&lt;Long, Integer&gt;() {
-            @Override
-            public Integer call(Long increaseTime) {
-                return 60 - increaseTime.intValue();
-            }
-        })
-        .take(61)//设置循环次数为61次
-        .doOnSubscribe(new Action0() {
-            @Override
-            public void call() {
-                //开始倒计时
-                tvStart.setEnabled(false);
-            }
-        })
-        .subscribe(new Subscriber&lt;Integer&gt;() {
-            @Override
-            public void onCompleted() {
-                //倒计时完成
-                tvStart.setEnabled(true);
-                tvStart.setText(&quot;重新发送&quot;);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onNext(Integer integer) {
-                //剩余时间
-                tvStart.setText(&quot;重新发送&quot; + integer + &quot;s&quot;);
-            }
-        });
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/22/Android优雅实现倒计时功能的两种方式/" data-id="cj1wchs5i0003e44cdj676f15" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-test" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/04/20/test/" class="article-date">
-  <time datetime="2017-04-20T09:29:42.000Z" itemprop="datePublished">2017-04-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
+    <a href="/2017/04/22/Android优雅实现倒计时功能的两种方式/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/04/20/test/">test</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>##标题<br>    第一次哦！</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/20/test/" data-id="cj1wchs4w0000e44cnceo5ff6" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/04/20/hello-world/" class="article-date">
-  <time datetime="2017-04-20T08:53:46.000Z" itemprop="datePublished">2017-04-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
+          (no title)
         
+      </div>
+    </a>
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/04/20/hello-world/">Hello World</a>
-    </h1>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/20/hello-world/" data-id="cj1wchs5d0001e44cqyhuoyz9" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
   
 </article>
-
-
-  
 
 </section>
         
