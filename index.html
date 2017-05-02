@@ -50,7 +50,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Søk"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -60,6 +60,75 @@
 </header>
       <div class="outer">
         <section id="main">
+  
+    <article id="post-通过Intent调用其它程序时的注意事项" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/05/02/通过Intent调用其它程序时的注意事项/" class="article-date">
+  <time datetime="2017-05-02T02:45:49.000Z" itemprop="datePublished">2017-05-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/05/02/通过Intent调用其它程序时的注意事项/">通过Intent调用其它程序时的注意事项</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在Android开发中，我们经常通过Intent去调用其它程序或者系统程序帮我们做一些常用的操作，如拨打电话，发送短信等等。在程序中，我们也可以在Manifest文件中配置相应的参数去监听其它程序的意图，比如当我们写一个播放器时，可以监听系统中播放视频的意图，这样用户在点击视频时就可以选择我们自己的程序，并通过我们的程序播放视频。</p>
+<p>但在使用意图调用其它程序时，发现了一些问题会导致程序奔溃，查看日志才发现如果设备中没有对应的程序去匹配我们的意图，我们的程序就会奔溃。比如我需要打开一个Word文档，通过一个意图去调用外部程序，当手机上没有安装Office、WPS之类的软件时，程序就会奔溃。</p>
+<p>查阅资料后发现可以通过代码检测意图是否可用，即是否有对应的外部程序去处理我们发出去的意图。这样当没有外部程序处理我们的意图时就可以给用户一个友好的提醒，并且程序也不会奔溃。</p>
+<pre><code>打开外部Word文件意图
+
+      /**
+     * 获取一个打开Word文件的意图
+     * @param path Word文件路径
+     * @return 打开Word文件的意图
+     */
+    public static Intent getWordFileIntent(String path) {
+        Intent intent = new Intent(&quot;android.intent.action.VIEW&quot;);
+        intent.addCategory(&quot;android.intent.category.DEFAULT&quot;);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Uri uri = Uri.fromFile(new File(path));
+        intent.setDataAndType(uri, &quot;application/msword&quot;);
+        return intent;
+    }
+</code></pre><p>通过该方法可以获取一个一个打开word文件的意图，当我们需要打开word文件时，直接传入文件路径就可以获取一个意图。但当手机上没有安装office软件时，点击word文件程序直接奔溃。</p>
+<pre><code>/**
+ * 判断Intent 是否存在 防止崩溃
+ *
+ * @param context 上下文
+ * @param intent 意图
+ * @return true 意图可用 false 意图不可用
+ */
+private boolean isIntentAvailable(Context context, Intent intent) {
+    final PackageManager packageManager = context.getPackageManager();
+    List&lt;ResolveInfo&gt; list = packageManager.queryIntentActivities(intent,
+            PackageManager.GET_ACTIVITIES);
+    return list.size() &gt; 0;
+}
+</code></pre><p>通过该方法，我们可以检测一个Intent是否可用，即是否有对应程序去处理我们的意图，有返回true，没有程序处理意图时返回false。在startActivity之前，我们可以通过该方法来判断当前Intent是否有对应的程序去处理。既能解决奔溃问题，又能在没有对应的程序处理时给用户一个友好的提醒。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/05/02/通过Intent调用其它程序时的注意事项/" data-id="cj26z2rcr0001cf4cpqctgrq8" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
   
     <article id="post-Android常用框架实现-FragmentTabHost" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -193,7 +262,7 @@ private View initIndicatorView(String name, int layoutId, int imageId) {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/25/Android常用框架实现-FragmentTabHost/" data-id="cj1wd7sjt0001tl4cdal6wmxg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/04/25/Android常用框架实现-FragmentTabHost/" data-id="cj26z2rcj0000cf4cav1xb5ly" class="article-share-link">Share</a>
       
       
     </footer>
@@ -295,7 +364,7 @@ private View initIndicatorView(String name, int layoutId, int imageId) {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/25/Android实现倒计时的两种方式/" data-id="cj1wd7sjm0000tl4c644lv7cz" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/04/25/Android实现倒计时的两种方式/" data-id="cj26z2rcv0002cf4cjrrdifqq" class="article-share-link">Share</a>
       
       
     </footer>
@@ -320,9 +389,9 @@ private View initIndicatorView(String name, int layoutId, int imageId) {
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
+    <h3 class="widget-title">Arkiv</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li></ul>
     </div>
   </div>
 
@@ -330,9 +399,13 @@ private View initIndicatorView(String name, int layoutId, int imageId) {
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">Siste innlegg</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/05/02/通过Intent调用其它程序时的注意事项/">通过Intent调用其它程序时的注意事项</a>
+          </li>
         
           <li>
             <a href="/2017/04/25/Android常用框架实现-FragmentTabHost/">Android常用框架实现--FragmentTabHost</a>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>通过Intent调用其它程序时的注意事项 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="在Android开发中，我们经常通过Intent去调用其它程序或者系统程序帮我们做一些常用的操作，如拨打电话，发送短信等等。在程序中，我们也可以在Manifest文件中配置相应的参数去监听其它程序的意图，比如当我们写一个播放器时，可以监听系统中播放视频的意图，这样用户在点击视频时就可以选择我们自己的程序，并通过我们的程序播放视频。 但在使用意图调用其它程序时，发现了一些问题会导致程序奔溃，查看日志">
+<meta name="keywords">
+<meta property="og:type" content="article">
+<meta property="og:title" content="通过Intent调用其它程序时的注意事项">
+<meta property="og:url" content="http://yoursite.com/2017/05/02/通过Intent调用其它程序时的注意事项/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="在Android开发中，我们经常通过Intent去调用其它程序或者系统程序帮我们做一些常用的操作，如拨打电话，发送短信等等。在程序中，我们也可以在Manifest文件中配置相应的参数去监听其它程序的意图，比如当我们写一个播放器时，可以监听系统中播放视频的意图，这样用户在点击视频时就可以选择我们自己的程序，并通过我们的程序播放视频。 但在使用意图调用其它程序时，发现了一些问题会导致程序奔溃，查看日志">
+<meta property="og:updated_time" content="2017-05-02T03:06:05.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="通过Intent调用其它程序时的注意事项">
+<meta name="twitter:description" content="在Android开发中，我们经常通过Intent去调用其它程序或者系统程序帮我们做一些常用的操作，如拨打电话，发送短信等等。在程序中，我们也可以在Manifest文件中配置相应的参数去监听其它程序的意图，比如当我们写一个播放器时，可以监听系统中播放视频的意图，这样用户在点击视频时就可以选择我们自己的程序，并通过我们的程序播放视频。 但在使用意图调用其它程序时，发现了一些问题会导致程序奔溃，查看日志">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Søk"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-通过Intent调用其它程序时的注意事项" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/05/02/通过Intent调用其它程序时的注意事项/" class="article-date">
+  <time datetime="2017-05-02T02:45:49.000Z" itemprop="datePublished">2017-05-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      通过Intent调用其它程序时的注意事项
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在Android开发中，我们经常通过Intent去调用其它程序或者系统程序帮我们做一些常用的操作，如拨打电话，发送短信等等。在程序中，我们也可以在Manifest文件中配置相应的参数去监听其它程序的意图，比如当我们写一个播放器时，可以监听系统中播放视频的意图，这样用户在点击视频时就可以选择我们自己的程序，并通过我们的程序播放视频。</p>
+<p>但在使用意图调用其它程序时，发现了一些问题会导致程序奔溃，查看日志才发现如果设备中没有对应的程序去匹配我们的意图，我们的程序就会奔溃。比如我需要打开一个Word文档，通过一个意图去调用外部程序，当手机上没有安装Office、WPS之类的软件时，程序就会奔溃。</p>
+<p>查阅资料后发现可以通过代码检测意图是否可用，即是否有对应的外部程序去处理我们发出去的意图。这样当没有外部程序处理我们的意图时就可以给用户一个友好的提醒，并且程序也不会奔溃。</p>
+<pre><code>打开外部Word文件意图
+
+      /**
+     * 获取一个打开Word文件的意图
+     * @param path Word文件路径
+     * @return 打开Word文件的意图
+     */
+    public static Intent getWordFileIntent(String path) {
+        Intent intent = new Intent(&quot;android.intent.action.VIEW&quot;);
+        intent.addCategory(&quot;android.intent.category.DEFAULT&quot;);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Uri uri = Uri.fromFile(new File(path));
+        intent.setDataAndType(uri, &quot;application/msword&quot;);
+        return intent;
+    }
+</code></pre><p>通过该方法可以获取一个一个打开word文件的意图，当我们需要打开word文件时，直接传入文件路径就可以获取一个意图。但当手机上没有安装office软件时，点击word文件程序直接奔溃。</p>
+<pre><code>/**
+ * 判断Intent 是否存在 防止崩溃
+ *
+ * @param context 上下文
+ * @param intent 意图
+ * @return true 意图可用 false 意图不可用
+ */
+private boolean isIntentAvailable(Context context, Intent intent) {
+    final PackageManager packageManager = context.getPackageManager();
+    List&lt;ResolveInfo&gt; list = packageManager.queryIntentActivities(intent,
+            PackageManager.GET_ACTIVITIES);
+    return list.size() &gt; 0;
+}
+</code></pre><p>通过该方法，我们可以检测一个Intent是否可用，即是否有对应程序去处理我们的意图，有返回true，没有程序处理意图时返回false。在startActivity之前，我们可以通过该方法来判断当前Intent是否有对应的程序去处理。既能解决奔溃问题，又能在没有对应的程序处理时给用户一个友好的提醒。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/05/02/通过Intent调用其它程序时的注意事项/" data-id="cj26z2rcr0001cf4cpqctgrq8" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/04/25/Android常用框架实现-FragmentTabHost/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android常用框架实现--FragmentTabHost
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Arkiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Siste innlegg</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/02/通过Intent调用其它程序时的注意事项/">通过Intent调用其它程序时的注意事项</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/25/Android常用框架实现-FragmentTabHost/">Android常用框架实现--FragmentTabHost</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/25/Android实现倒计时的两种方式/">Android实现倒计时的两种方式</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
