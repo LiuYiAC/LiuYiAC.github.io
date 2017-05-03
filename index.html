@@ -50,7 +50,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Søk"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -60,6 +60,152 @@
 </header>
       <div class="outer">
         <section id="main">
+  
+    <article id="android-APP中调用百度地图或高德地图导航" class="article article-type-android" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/05/03/APP中调用百度地图或高德地图导航/" class="article-date">
+  <time datetime="2017-05-03T03:30:25.000Z" itemprop="datePublished">2017-05-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/05/03/APP中调用百度地图或高德地图导航/">APP中调用百度地图或高德地图导航</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>导航是我们经常需要使用的功能，但是我们不可能自己来写一个导航的APP，于是就有了需要调用百度地图或者高德地图的导航功能。通过Intent可以轻松实现该功能。</p>
+<p>主要代码：</p>
+<pre><code>/**
+ * 打开百度地图
+ * @param lon
+ * @param lat
+ * @param title
+ * @param describle
+ */
+private void openBaiduMap(double lon, double lat, String title, String describle) {
+    try {
+        StringBuilder loc = new StringBuilder();
+        loc.append(&quot;intent://map/direction?origin=latlng:&quot;);
+        loc.append(lat);
+        loc.append(&quot;,&quot;);
+        loc.append(lon);
+        loc.append(&quot;|name:&quot;);
+        loc.append(&quot;我的位置&quot;);
+        loc.append(&quot;&amp;destination=latlng:&quot;);
+        loc.append(lat);
+        loc.append(&quot;,&quot;);
+        loc.append(lon);
+        loc.append(&quot;|name:&quot;);
+        loc.append(describle);
+        loc.append(&quot;&amp;mode=driving&quot;);
+        loc.append(&quot;&amp;referer=Autohome|GasStation#Intent;scheme=bdapp;package=com.baidu.BaiduMap;end&quot;);
+        Intent intent = Intent.getIntent(loc.toString());
+        if (isInstallPackage(&quot;com.baidu.BaiduMap&quot;)) {
+            startActivity(intent); //启动调用
+        } else {
+            ToastUtils.showMessage(ServiceOutletsActivity.this, &quot;没有安装百度地图客户端&quot;);
+
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+</code></pre><hr>
+<pre><code>/**
+ * 打开高德地图
+ * @param lon
+ * @param lat
+ * @param title
+ * @param describle
+ */
+private void openGaoDeMap(double lon, double lat, String title, String describle) {
+    try {
+        double[] gd_lat_lon = bdToGaoDe(lon, lat);
+        StringBuilder loc = new StringBuilder();
+        loc.append(&quot;androidamap://viewMap?sourceApplication=XX&quot;);
+        loc.append(&quot;&amp;poiname=&quot;);
+        loc.append(describle);
+        loc.append(&quot;&amp;lat=&quot;);
+        loc.append(gd_lat_lon[0]);
+        loc.append(&quot;&amp;lon=&quot;);
+        loc.append(gd_lat_lon[1]);
+        loc.append(&quot;&amp;dev=0&quot;);
+        Intent intent = Intent.getIntent(loc.toString());
+        if (isInstallPackage(&quot;com.autonavi.minimap&quot;)) {
+            startActivity(intent); //启动调用
+        } else {
+            ToastUtils.showMessage(ServiceOutletsActivity.this, &quot;没有安装高德地图客户端&quot;);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+</code></pre><hr>
+<pre><code>/**
+ * 判断应用是否安装
+ * @param packageName 包名
+ * @return true 安装 false 未安装
+ */
+private boolean isInstallPackage(String packageName) {
+    return new File(&quot;/data/data/&quot; + packageName).exists();
+}
+</code></pre><hr>
+<pre><code>/**
+ * 百度地图坐标转换成高德坐标
+ * @param bd_lat
+ * @param bd_lon
+ * @return
+ */
+private double[] bdToGaoDe(double bd_lat, double bd_lon) {
+    double[] gd_lat_lon = new double[2];
+    double PI = 3.14159265358979324 * 3000.0 / 180.0;
+    double x = bd_lon - 0.0065, y = bd_lat - 0.006;
+    double z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * PI);
+    double theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * PI);
+    gd_lat_lon[0] = z * Math.cos(theta);
+    gd_lat_lon[1] = z * Math.sin(theta);
+    return gd_lat_lon;
+}
+</code></pre><hr>
+<pre><code>/**
+ * 高德坐标转换为百度坐标
+ * @param gd_lon
+ * @param gd_lat
+ * @return
+ */
+private double[] gaoDeToBaidu(double gd_lon, double gd_lat) {
+    double[] bd_lat_lon = new double[2];
+    double PI = 3.14159265358979324 * 3000.0 / 180.0;
+    double x = gd_lon, y = gd_lat;
+    double z = Math.sqrt(x * x + y * y) + 0.00002 * Math.sin(y * PI);
+    double theta = Math.atan2(y, x) + 0.000003 * Math.cos(x * PI);
+    bd_lat_lon[0] = z * Math.cos(theta) + 0.0065;
+    bd_lat_lon[1] = z * Math.sin(theta) + 0.006;
+    return bd_lat_lon;
+}
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/05/03/APP中调用百度地图或高德地图导航/" data-id="cj28fsyi20000hg4ci5h8xzgl" class="article-share-link">Delen</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
   
     <article id="post-通过Intent调用其它程序时的注意事项" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -120,7 +266,7 @@ private boolean isIntentAvailable(Context context, Intent intent) {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/05/02/通过Intent调用其它程序时的注意事项/" data-id="cj26z2rcr0001cf4cpqctgrq8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/05/02/通过Intent调用其它程序时的注意事项/" data-id="cj28fsyie0002hg4cou90mgzy" class="article-share-link">Delen</a>
       
       
     </footer>
@@ -262,7 +408,7 @@ private View initIndicatorView(String name, int layoutId, int imageId) {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/25/Android常用框架实现-FragmentTabHost/" data-id="cj26z2rcj0000cf4cav1xb5ly" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/04/25/Android常用框架实现-FragmentTabHost/" data-id="cj28fsyib0001hg4c3nn2c5fh" class="article-share-link">Delen</a>
       
       
     </footer>
@@ -364,7 +510,7 @@ private View initIndicatorView(String name, int layoutId, int imageId) {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/04/25/Android实现倒计时的两种方式/" data-id="cj26z2rcv0002cf4cjrrdifqq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/04/25/Android实现倒计时的两种方式/" data-id="cj28fsyig0003hg4cbrwb65ra" class="article-share-link">Delen</a>
       
       
     </footer>
@@ -389,7 +535,7 @@ private View initIndicatorView(String name, int layoutId, int imageId) {
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Arkiv</h3>
+    <h3 class="widget-title">Archieven</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li></ul>
     </div>
@@ -399,9 +545,13 @@ private View initIndicatorView(String name, int layoutId, int imageId) {
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Siste innlegg</h3>
+    <h3 class="widget-title">Recente berichten</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/05/03/APP中调用百度地图或高德地图导航/">APP中调用百度地图或高德地图导航</a>
+          </li>
         
           <li>
             <a href="/2017/05/02/通过Intent调用其它程序时的注意事项/">通过Intent调用其它程序时的注意事项</a>
